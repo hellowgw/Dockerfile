@@ -55,11 +55,10 @@ RUN useradd -s /sbin/nologin $APP_USER \
        --add-module=$SRC_PATH/$NGX_DEVEL_KIT_VERSION \
        --add-module=$SRC_PATH/$Lua_NGX_MODULE_VERSION \
        --with-ld-opt="-Wl,-rpath,$APP_PATH/$NGX_VERSION/lib" \
-    && make && make install \
+    && make && make install && mkdir -p $APP_PATH/nginx/conf/vhosts \
     && yum clean all && rm -fr $SRC_PATH/*
 
 EXPOSE 80 443
 
-CMD ["/bin/bash"]
-#CMD ["/usr/local/nginx/sbin/nginx"]
+CMD ["/usr/local/nginx/sbin/nginx"]
 
