@@ -1,0 +1,32 @@
+version: '3'
+services:
+  php-fpm:
+    image: "php:v7.2-ext"
+    expose:
+      - "9000"
+    volumes:
+      - /data/conf/php/php-fpm.conf:/usr/local/php/etc/php-fpm.conf:ro 
+      - /data/conf/php/php.ini:/usr/local/php/etc/php.ini:ro 
+      - /data/conf/php/www.conf:/usr/local/php/etc/php-fpm.d/www.conf:ro 
+      - /data/log/php:/data/log/php 
+      - /data/tmp:/data/tmp 
+      - /data/wwwroot:/data/wwwroot 
+    networks:
+      - mynet
+
+  nginx:
+    image: "nginx:v2.2"
+    expose:
+      - "80"
+      - "443"
+    volumes:
+      - /data/conf/nginx/nginx.conf:/usr/local/nginx/conf/nginx.conf:ro 
+      - /data/conf/nginx/vhosts:/usr/local/nginx/conf/vhosts:ro 
+      - /data/log/nginx:/usr/local/nginx/logs 
+    links:
+      - php-fpm
+    networks:
+      - mynet
+
+networks:
+  mynet:
