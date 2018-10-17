@@ -1,0 +1,30 @@
+[base]
+name=CentOS-7-x86_64_base
+baseurl=http://172.16.1.254/cobbler/repo_mirror/CentOS-7-x86_64_base
+gpgcheck=1
+enabled=1
+gpgkey=http://172.16.1.254/centos/RPM-GPG-KEY-CentOS-7
+
+#released updates 
+[updates]
+name=CentOS-7-x86_64_updates
+baseurl=http://172.16.1.254/cobbler/repo_mirror/CentOS-7-x86_64_updates
+gpgcheck=1
+enabled=1
+gpgkey=http://172.16.1.254/centos/RPM-GPG-KEY-CentOS-7
+
+#additional packages that may be useful
+[extras]
+name=CentOS-7-x86_64_extras
+baseurl=http://172.16.1.254/cobbler/repo_mirror/CentOS-7-x86_64_extras
+gpgcheck=1
+enabled=1
+gpgkey=http://172.16.1.254/centos/RPM-GPG-KEY-CentOS-7
+
+#additional packages that extend functionality of existing packages
+[centosplus]
+name=CentOS-7-x86_64_centosplus
+baseurl=http://172.16.1.254/cobbler/repo_mirror/CentOS-7-x86_64_centosplus
+gpgcheck=1
+enabled=1
+gpgkey=http://172.16.1.254/centos/RPM-GPG-KEY-CentOS-7
