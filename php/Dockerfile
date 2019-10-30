@@ -66,7 +66,7 @@ RUN useradd -s /sbin/nologin $APP_USER \
 --with-gettext \
 && make -j 4 && make install \
 \
-&& ln -s /usr/local/php/bin/* /usr/local/bin/ \
+&& rm -fr /usr/bin/git && ln -s /usr/local/php/bin/* /usr/local/bin/ \
 \
 && rm -fr $SRC_PATH/* && yum clean all 
 

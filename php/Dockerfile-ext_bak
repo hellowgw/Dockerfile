@@ -1,0 +1,71 @@
+FROM hellowgw/php:v7.2
+MAINTAINER wanggw
+
+# SET ENVIRONMENT
+ENV PHPREDIS=phpredis-3.1.6 \
+IGBINARY=igbinary-2.0.5 \
+MONGODB=mongodb-1.5.3 \
+MSGPACK=msgpack-2.0.2 \
+SEASLOG=SeasLog-1.7.6 \
+YAF=yaf-3.0.6 \
+YAR=yar-2.0.4 \
+SWOOLE=swoole-4.1.1 \
+PHP_PATH=/usr/local/php \
+SRC_PATH=/usr/local/src \
+DOWNLOAD_SERVER=http://172.16.1.254/soft/php
+
+# INSTALL PHP extensions
+RUN cd $SRC_PATH \
+# igbinary
+&& wget -O $SRC_PATH/igbinary.tgz $DOWNLOAD_SERVER/$IGBINARY.tgz \
+&& tar zxf igbinary.tgz \
+&& cd $IGBINARY && $PHP_PATH/bin/phpize && ./configure --with-php-config=/usr/local/php/bin/php-config && make -j && make install \
+\
+# phpredis
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/phpredis.zip $DOWNLOAD_SERVER/$PHPREDIS.zip \
+&& unzip phpredis.zip \
+&& cd $PHPREDIS && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config --enable-redis-igbinary && make -j && make install \
+\
+# mangodb
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/mongodb.tgz $DOWNLOAD_SERVER/$MONGODB.tgz \
+&& tar zxf mongodb.tgz \
+&& cd $MONGODB && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config && make -j && make install \
+\
+# msgpack
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/msgpack.zip $DOWNLOAD_SERVER/$MSGPACK.zip \
+&& unzip msgpack.zip \
+&& cd msgpack-php-$MSGPACK && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config && make -j && make install \
+\
+# seaslog
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/SeasLog.zip $DOWNLOAD_SERVER/$SEASLOG.zip \
+&& unzip SeasLog.zip \
+&& cd SeasLog-$SEASLOG && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config &&  make -j && make install \
+\
+# yaf
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/yaf.zip $DOWNLOAD_SERVER/$YAF.zip \
+&& unzip yaf.zip \
+&& cd yaf-$YAF && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config && make -j && make install \
+\
+# yar
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/yar.zip $DOWNLOAD_SERVER/$YAR.zip \
+&& unzip yar.zip \
+&& cd yar-$YAR && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config --enable-msgpack &&  make -j && make install \
+\
+# swoole
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/swoole.zip $DOWNLOAD_SERVER/$SWOOLE.zip \
+&& unzip swoole.zip \
+&& cd swoole-src-4.1.1 && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config --enable-openssl && make -j && make install \
+\
+&& rm -fr $SRC_PATH/* 
+
+EXPOSE 9000
+
+CMD ["/usr/local/php/sbin/php-fpm", "-c", "/usr/local/php/etc/php.ini", "-y", "/usr/local/php/etc/php-fpm.conf"]
+

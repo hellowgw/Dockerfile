@@ -1,6 +1,5 @@
-FROM php:v7.2
-MAINTAINER wanggw
-  
+FROM centos:latest
+MAINTAINER wanggw_20190828
 
 # SET ENVIRONMENT
 ENV PHPREDIS=phpredis-3.1.6 \
@@ -11,12 +10,74 @@ SEASLOG=SeasLog-1.7.6 \
 YAF=yaf-3.0.6 \
 YAR=yar-2.0.4 \
 SWOOLE=swoole-4.1.1 \
+APP_USER=www \
+BISON=bison-2.4.1 \
+PHP=php-7.2.19 \
+CURL=curl-7.65.3 \
+GIT=git-2.21.0 \
+FFMPEG=ffmpeg-4.2-amd64-static \
 PHP_PATH=/usr/local/php \
 SRC_PATH=/usr/local/src \
-DOWNLOAD_SERVER=http://172.16.1.254/soft
+DOWNLOAD_SERVER=http://172.16.1.254/soft/php
 
+# DOWNLOAD aliyun REPO
+RUN yum install -y libxml2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel libicu-devel libxslt-devel openssl-devel wget gcc glibc-headers gcc-c++ m4 make autoconf unzip install -y curl-devel expat-devel gettext-devel zlib-devel perl-ExtUtils-MakeMaker \ 
+# SET TIMEZONE
+&& cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+&& echo 'Asia/Shanghai' >/etc/timezone \
+# INSTALL PHP
+&& useradd -s /sbin/nologin $APP_USER \
+\
+&& wget -O $SRC_PATH/bison.tar.gz $DOWNLOAD_SERVER/$BISON.tar.gz \
+&& cd $SRC_PATH && tar zxf bison.tar.gz && cd $BISON && ./configure && make && make install \
+\
+&& wget -O $SRC_PATH/$PHP.tar.gz $DOWNLOAD_SERVER/$PHP.tar.gz \
+&& cd $SRC_PATH && tar zxf $PHP.tar.gz && cd $PHP \
+&& ./configure --prefix=$PHP_PATH \
+--with-mhash \
+--with-openssl \
+--with-config-file-path=$PHP_PATH/etc \
+--disable-short-tags \
+--enable-fpm \
+--with-fpm-user=$APP_USER \
+--with-fpm-group=$APP_USER \
+--enable-xml \
+--with-libxml-dir \
+--enable-bcmath \
+--enable-calendar \
+--enable-intl \
+--enable-mbstring \
+--enable-pcntl \
+--enable-shmop \
+--enable-soap \
+--enable-sockets \
+--enable-zip \
+--enable-mbregex \
+--enable-mysqlnd \
+--enable-mysqlnd-compression-support \
+--with-mysqli=mysqlnd \
+--with-pdo-mysql=mysqlnd \
+--with-pdo-mysql \
+--with-mysqli \
+--with-gd \
+--enable-ftp \
+--with-curl \
+--with-xsl \
+--with-iconv \
+--with-freetype-dir \
+--with-jpeg-dir \
+--with-png-dir \
+--with-zlib \
+--enable-sysvsem \
+--enable-inline-optimization \
+--with-xmlrpc \
+--with-gettext \
+&& make -j 4 && make install \
+\
+&& ln -s /usr/local/php/bin/* /usr/local/bin/ \
+\
 # INSTALL PHP extensions
-RUN cd $SRC_PATH \
+&&  cd $SRC_PATH \
 # igbinary
 && wget -O $SRC_PATH/igbinary.tgz $DOWNLOAD_SERVER/$IGBINARY.tgz \
 && tar zxf igbinary.tgz \
@@ -62,9 +123,31 @@ RUN cd $SRC_PATH \
 && cd $SRC_PATH \
 && wget -O $SRC_PATH/swoole.zip $DOWNLOAD_SERVER/$SWOOLE.zip \
 && unzip swoole.zip \
-&& cd swoole && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config --enable-openssl && make -j && make install \
+&& cd swoole-src-4.1.1 && $PHP_PATH/bin/phpize && ./configure --with-php-config=$PHP_PATH/bin/php-config --enable-openssl && make -j && make install \
 \
-&& rm -fr $SRC_PATH/* 
+# curl
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/$CURL.tar.gz $DOWNLOAD_SERVER/$CURL.tar.gz \
+&& tar zxf $CURL.tar.gz && cd $CURL \
+&& ./configure --prefix=/usr/local/ \
+&& make && make install \
+&& rm -fr /usr/bin/curl && ln -s /usr/local/bin/curl /usr/bin/curl \
+\
+# ffmpeg
+&& wget -O /usr/local/bin/ffmpeg $DOWNLOAD_SERVER/$FFMPEG/ffmpeg && chmod +x /usr/local/bin/ffmpeg \
+&& wget -O /usr/local/bin/ffprobe $DOWNLOAD_SERVER/$FFMPEG/ffprobe && chmod +x /usr/local/bin/ffprobe \
+\
+# composer
+&& curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer && chmod +x /usr/local/bin/composer \
+\
+# git
+&& cd $SRC_PATH \
+&& wget -O $SRC_PATH/$GIT.tar.gz $DOWNLOAD_SERVER/$GIT.tar.gz \
+&& tar zxf $GIT.tar.gz && cd $GIT \
+&& make prefix=/usr/local/ && make prefix=/usr/local/ install \
+&& rm -fr /usr/bin/git && ln -s /usr/local/bin/git /usr/bin/git \
+\
+&& rm -fr $SRC_PATH/* && yum clean all
 
 EXPOSE 9000
 
